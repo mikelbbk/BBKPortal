@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Auction Bid Caller</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:           #eaefef;
+    --mid:          #bfc9d1;
+    --dark:         #25343f;
+    --orange:       #ff9b51;
+    --orange-mid:   #ff8535;
+    --orange-pale:  #fff5ee;
+    --orange-bd:    #ffd8b4;
+    --white:        #ffffff;
+    --ink-soft:     #6a7f8c;
+    --ink-ghost:    #9aadb8;
+    --shadow-sm:    0 1px 4px rgba(37,52,63,0.08);
+    --shadow:       0 4px 20px rgba(37,52,63,0.12);
+    --r:    8px;
+    --r-lg: 14px;
+    --r-xl: 20px;
+
+    --z-open-bg:    #f4f7f8;
+    --z-open-bar:   #bfc9d1;
+    --z-open-call:  #25343f;
+
+    --z-mid-bg:     #edf4e8;
+    --z-mid-bar:    #4a8a40;
+    --z-mid-call:   #1c3818;
+
+    --z-tight-bg:   #fdf4e0;
+    --z-tight-bar:  #d48a20;
+    --z-tight-call: #5a3c00;
+
+    --z-warn-bg:    #fce9e3;
+    --z-warn-bar:   #c03020;
+    --z-warn-call:  #6e1508;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--dark);
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ff9b51' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(160deg, #25343f 0%, #1c2830 55%, #131d24 100%);
+    position: relative; z-index: 1; overflow: hidden;
+  }
+  .header-leaves { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .leaf { position: absolute; opacity: 0.08; font-size: 80px; line-height: 1; animation: sway 9s ease-in-out infinite alternate; }
+  .leaf:nth-child(1) { top: -10px; right: 40px;  font-size: 110px; animation-delay: 0s; }
+  .leaf:nth-child(2) { bottom: -10px; right: 160px; font-size: 65px; animation-delay: -3s; }
+  .leaf:nth-child(3) { top: 15px; right: 220px; font-size: 48px; animation-delay: -5s; }
+  .leaf:nth-child(4) { bottom: 0; left: -10px; font-size: 90px; animation-delay: -2s; opacity: 0.05; }
+  @keyframes sway { from { transform: rotate(-4deg) scale(1); } to { transform: rotate(4deg) scale(1.04); } }
+
+  .header-inner {
+    max-width: 680px; margin: 0 auto;
+    padding: 2.5rem 1.5rem 2.25rem;
+    position: relative; z-index: 1;
+  }
+  .header-eyebrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 20px; padding: 3px 14px;
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(255,255,255,0.7); font-weight: 600; margin-bottom: 1rem;
+  }
+  .header h1 {
+    font-family: 'Lora', Georgia, serif;
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    font-weight: 600; color: #fff; line-height: 1.1;
+    margin-bottom: 0.5rem; letter-spacing: -0.01em;
+  }
+  .header h1 em { font-style: italic; font-weight: 400; color: var(--orange); }
+  .header-sub {
+    font-size: 13px; color: rgba(255,255,255,0.55);
+    font-weight: 300; line-height: 1.7;
+  }
+
+  /* ── PAGE ── */
+  .page {
+    max-width: 680px; margin: 0 auto;
+    padding: 2rem 1.5rem 3rem;
+    position: relative; z-index: 1;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--mid);
+    border-radius: var(--r-xl);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+  .section-icon {
+    width: 32px; height: 32px;
+    background: var(--orange-pale); border: 1px solid var(--orange-bd);
+    border-radius: var(--r); display: flex; align-items: center;
+    justify-content: center; font-size: 15px; flex-shrink: 0;
+  }
+  .section-title { font-family: 'Lora', serif; font-size: 15px; font-weight: 500; color: var(--dark); }
+
+  /* ── INPUTS ── */
+  .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label {
+    font-size: 11px; font-weight: 600;
+    color: var(--ink-soft); letter-spacing: 0.03em;
+  }
+  .input-wrap { position: relative; }
+  .pfx { position: absolute; top: 50%; transform: translateY(-50%); left: 11px; font-size: 13px; color: var(--ink-ghost); pointer-events: none; }
+
+  .field input {
+    width: 100%;
+    background: var(--bg);
+    border: 1.5px solid var(--mid);
+    border-radius: var(--r);
+    padding: 9px 12px 9px 24px;
+    color: var(--dark);
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px; font-weight: 600;
+    outline: none;
+    -webkit-appearance: none;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+  .field input:focus {
+    border-color: var(--orange);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(255,155,81,0.15);
+  }
+  .field input::placeholder { color: var(--ink-ghost); font-weight: 400; }
+
+  /* ── BUTTON ── */
+  .btn-generate {
+    width: 100%;
+    padding: 12px;
+    background: var(--dark);
+    color: #fff;
+    border: none;
+    border-radius: var(--r-lg);
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px; font-weight: 700;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: background 0.18s, transform 0.1s;
+    margin-top: 1rem;
+  }
+  .btn-generate:hover { background: var(--orange); }
+  .btn-generate:active { transform: scale(0.99); }
+
+  /* ── SUMMARY STATS ── */
+  .summary {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px; margin-bottom: 1rem;
+  }
+  .stat {
+    background: var(--white); border: 1px solid var(--mid);
+    border-radius: var(--r-lg); padding: 10px 14px;
+    box-shadow: var(--shadow-sm);
+  }
+  .stat-label {
+    font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-ghost); font-weight: 700; margin-bottom: 3px;
+  }
+  .stat-val {
+    font-family: 'Lora', serif;
+    font-size: 20px; font-weight: 600; color: var(--dark);
+  }
+
+  /* ── LEGEND ── */
+  .legend {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+  .leg { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+  .leg-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+
+  /* ── TABLE ── */
+  .tbl-wrap {
+    border-radius: var(--r-xl); border: 1px solid var(--mid);
+    overflow: hidden; box-shadow: var(--shadow-sm);
+  }
+
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+
+  col.c-call  { width: 28%; }
+  col.c-full  { width: 28%; }
+  col.c-above { width: 27%; }
+  col.c-step  { width: 17%; }
+
+  thead { position: sticky; top: 0; z-index: 10; }
+  thead th {
+    background: linear-gradient(135deg, #25343f 0%, #354a58 100%);
+    font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: rgba(255,255,255,0.85); font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    padding: 10px 12px; text-align: left; white-space: nowrap;
+  }
+  thead th.th-step { text-align: right; }
+
+  tbody tr { border-bottom: 1px solid rgba(191,201,209,0.4); cursor: pointer; }
+  tbody td { padding: 11px 12px; vertical-align: middle; overflow: hidden; }
+  tbody tr td:first-child { border-left: 5px solid transparent; padding-left: 9px; }
+
+  .tc-call  { font-size: 28px; font-weight: 800; line-height: 1; white-space: nowrap; }
+  .tc-full  { font-size: 14px; font-weight: 600; white-space: nowrap; }
+  .tc-above { font-size: 14px; font-weight: 700; white-space: nowrap; }
+  .tc-step  { font-size: 13px; font-weight: 600; text-align: right; white-space: nowrap; }
+
+  /* ZONE COLOURS */
+  .z-open  { background: var(--z-open-bg); }
+  .z-open  td:first-child { border-left-color: var(--z-open-bar); }
+  .z-open  .tc-call  { color: var(--z-open-call); }
+  .z-open  .tc-full  { color: var(--ink-soft); }
+  .z-open  .tc-above { color: var(--ink-soft); }
+  .z-open  .tc-step  { color: var(--ink-ghost); }
+
+  .z-mid   { background: var(--z-mid-bg); }
+  .z-mid   td:first-child { border-left-color: var(--z-mid-bar); }
+  .z-mid   .tc-call  { color: var(--z-mid-call); }
+  .z-mid   .tc-full  { color: #3a6030; }
+  .z-mid   .tc-above { color: #3a6030; }
+  .z-mid   .tc-step  { color: #5a8050; }
+
+  .z-tight { background: var(--z-tight-bg); }
+  .z-tight td:first-child { border-left-color: var(--z-tight-bar); }
+  .z-tight .tc-call  { color: var(--z-tight-call); }
+  .z-tight .tc-full  { color: #7a5e20; }
+  .z-tight .tc-above { color: #7a5e20; }
+  .z-tight .tc-step  { color: #9a7a30; }
+
+  .z-warn  { background: var(--z-warn-bg); }
+  .z-warn  td:first-child { border-left-color: var(--z-warn-bar); }
+  .z-warn  .tc-call  { color: var(--z-warn-call); }
+  .z-warn  .tc-full  { color: #882010; }
+  .z-warn  .tc-above { color: #882010; }
+  .z-warn  .tc-step  { color: #aa3020; }
+
+  .pill {
+    display: inline-block; font-size: 9px; letter-spacing: 0.08em;
+    text-transform: uppercase; padding: 2px 6px; border-radius: 4px;
+    background: #6e1508; color: #fce8e2;
+    margin-left: 5px; vertical-align: middle; font-weight: 800;
+  }
+
+  tbody tr.selected td { background: rgba(255,155,81,0.12) !important; box-shadow: inset 4px 0 0 var(--orange); }
+
+  .error {
+    background: #fce9e3; border: 1px solid #e0a090;
+    border-radius: var(--r-lg); padding: 12px 16px;
+    color: #882010; font-size: 13px; font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .tip {
+    font-size: 11px; color: var(--ink-ghost);
+    margin-top: 1rem; font-weight: 500; line-height: 1.7;
+  }
+
+  @media (max-width: 480px) {
+    .header-inner { padding: 1.75rem 1rem 1.5rem; }
+    .page { padding: 1.25rem 1rem 2rem; }
+    .input-grid { grid-template-columns: 1fr; }
+    .summary { grid-template-columns: 1fr 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-leaves" aria-hidden="true">
+    <span class="leaf">🔨</span>
+    <span class="leaf">🏷</span>
+    <span class="leaf">🏡</span>
+    <span class="leaf">🔑</span>
+  </div>
+  <div class="header-inner">
+    <div class="header-eyebrow">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      BBK Auction Tools
+    </div>
+    <h1>Auction Bid <em>Caller</em></h1>
+    <p class="header-sub">Enter your opening bid and max budget to generate a full bid sequence with zone warnings.</p>
+  </div>
+</header>
+
+<div class="page">
+
+  <div class="card">
+    <div class="section-head">
+      <div class="section-icon">🔨</div>
+      <div><p class="section-title">Auction parameters</p></div>
+    </div>
+    <div class="input-grid">
+      <div class="field">
+        <label>Opening bid</label>
+        <div class="input-wrap">
+          <span class="pfx">$</span>
+          <input type="number" id="open" placeholder="800,000" step="5000" inputmode="numeric" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Max budget</label>
+        <div class="input-wrap">
+          <span class="pfx">$</span>
+          <input type="number" id="max" placeholder="950,000" step="5000" inputmode="numeric" />
+        </div>
+      </div>
+    </div>
+    <button class="btn-generate" onclick="generate()">Generate bid table →</button>
+  </div>
+
+  <div id="out"></div>
+
+</div>
+
+<script>
+function fmtFull(n) {
+  return '$' + n.toLocaleString('en-AU');
+}
+
+function shorthand(n) {
+  if (n >= 1000000) {
+    let v = n / 1000000;
+    return (Number.isInteger(v) ? v.toFixed(0) : v.toFixed(3).replace(/\.?0+$/, '')) + 'M';
+  }
+  if (n >= 1000) {
+    let v = n / 1000;
+    return (Number.isInteger(v) ? v.toFixed(0) : v.toFixed(1).replace(/\.?0+$/, '')) + 'k';
+  }
+  return String(n);
+}
+
+function shorthandCall(n) {
+  if (n >= 1000000) {
+    let v = n / 1000000;
+    let num = Number.isInteger(v) ? v.toFixed(0) : v.toFixed(3).replace(/\.?0+$/, '');
+    return num + '<span style="font-size:16px;font-weight:600;opacity:0.7;">M</span>';
+  }
+  if (n >= 1000) {
+    let v = n / 1000;
+    let num = Number.isInteger(v) ? v.toFixed(0) : v.toFixed(1).replace(/\.?0+$/, '');
+    return num + '<span style="font-size:16px;font-weight:600;opacity:0.7;">k</span>';
+  }
+  return String(n);
+}
+
+function getIncrement(bid, range, pct) {
+  if (pct < 0.40) return 20000;
+  if (pct < 0.70) return 10000;
+  if (pct < 0.90) return 5000;
+  if (pct < 0.95) return 2000;
+  return 1000;
+}
+
+function generate() {
+  const open = parseInt(document.getElementById('open').value);
+  const max  = parseInt(document.getElementById('max').value);
+  const out  = document.getElementById('out');
+
+  if (!open || !max || open >= max) {
+    out.innerHTML = '<div class="error">Enter a valid opening bid less than your max budget.</div>';
+    return;
+  }
+
+  const range = max - open;
+  let bids = [{ bid: open, inc: null }];
+  let cur = open, s = 0;
+
+  while (cur < max && s++ < 300) {
+    let pct = (cur - open) / range;
+    let inc = getIncrement(cur, range, pct);
+    let next = Math.min(cur + inc, max);
+    bids.push({ bid: next, inc });
+    cur = next;
+  }
+
+  const summary = `
+    <div class="summary">
+      <div class="stat"><div class="stat-label">Opening</div><div class="stat-val">${shorthand(open)}</div></div>
+      <div class="stat"><div class="stat-label">Max</div><div class="stat-val">${shorthand(max)}</div></div>
+      <div class="stat"><div class="stat-label">Raises</div><div class="stat-val">${bids.length - 1}</div></div>
+    </div>
+    <div class="legend">
+      <div class="leg"><div class="leg-dot" style="background:#bfc9d1;"></div>Early</div>
+      <div class="leg"><div class="leg-dot" style="background:#4a8a40;"></div>Mid</div>
+      <div class="leg"><div class="leg-dot" style="background:#d48a20;"></div>Close</div>
+      <div class="leg"><div class="leg-dot" style="background:#c03020;"></div>Walk away</div>
+    </div>`;
+
+  let rows = '';
+  bids.forEach((b, i) => {
+    let pct = (b.bid - open) / range;
+    let z = pct > 0.95 ? 'warn' : pct > 0.80 ? 'tight' : pct > 0.50 ? 'mid' : 'open';
+    let above = b.bid - open;
+    let isMax = b.bid === max;
+    let pill = isMax ? '<span class="pill">MAX</span>' : '';
+    let aboveStr = above === 0 ? '<span style="color:#9aadb8">—</span>' : '+' + fmtFull(above);
+    let stepStr = b.inc ? '+' + shorthand(b.inc) : '—';
+
+    rows += `<tr class="z-${z}">
+      <td><span class="tc-call">${shorthandCall(b.bid)}${pill}</span></td>
+      <td><span class="tc-full">${fmtFull(b.bid)}</span></td>
+      <td><span class="tc-above">${aboveStr}</span></td>
+      <td><span class="tc-step">${stepStr}</span></td>
+    </tr>`;
+  });
+
+  out.innerHTML = summary + `
+    <div class="tbl-wrap">
+      <table>
+        <colgroup>
+          <col class="c-call">
+          <col class="c-full">
+          <col class="c-above">
+          <col class="c-step">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Call</th>
+            <th>Full price</th>
+            <th>Above opening</th>
+            <th class="th-step">Step</th>
+          </tr>
+        </thead>
+        <tbody>${rows}<tr style="background:#6e1508;"><td colspan="4" style="padding:14px 12px;text-align:center;font-size:22px;font-weight:800;color:#fff;letter-spacing:0.08em;border-left:5px solid #3d0a04;">🚫 WALK AWAY</td></tr></tbody>
+      </table>
+    </div>
+    <p class="tip">Increments taper as you approach your max &nbsp;·&nbsp; Amber = close &nbsp;·&nbsp; Red = walk away &nbsp;·&nbsp; Tap a row to highlight your current bid</p>`;
+
+  document.querySelectorAll('tbody tr').forEach(row => {
+    row.addEventListener('click', () => {
+      const wasSelected = row.classList.contains('selected');
+      document.querySelectorAll('tbody tr.selected').forEach(r => r.classList.remove('selected'));
+      if (!wasSelected) row.classList.add('selected');
+    });
+  });
+}
+</script>
+</body>
+</html>

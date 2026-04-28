@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BBK App Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:         #eaefef;
+    --mid:        #bfc9d1;
+    --dark:       #25343f;
+    --orange:     #ff9b51;
+    --orange-mid: #ff8535;
+    --orange-pale:#fff5ee;
+    --orange-bd:  #ffd8b4;
+    --white:      #ffffff;
+    --ink-soft:   #6a7f8c;
+    --ink-ghost:  #9aadb8;
+    --shadow-sm:  0 1px 4px rgba(37,52,63,0.08);
+    --shadow:     0 4px 20px rgba(37,52,63,0.12);
+    --shadow-lg:  0 8px 32px rgba(37,52,63,0.16);
+    --r:    10px;
+    --r-lg: 16px;
+    --r-xl: 22px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--dark);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ff9b51' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(160deg, #25343f 0%, #1c2830 55%, #131d24 100%);
+    position: relative; z-index: 1; overflow: hidden;
+  }
+  .header-leaves { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .leaf { position: absolute; opacity: 0.08; font-size: 90px; line-height: 1; animation: sway 9s ease-in-out infinite alternate; }
+  .leaf:nth-child(1) { top: -10px; right: 50px;  font-size: 120px; animation-delay: 0s; }
+  .leaf:nth-child(2) { bottom: -10px; right: 180px; font-size: 70px; animation-delay: -3s; }
+  .leaf:nth-child(3) { top: 15px; right: 240px; font-size: 50px; animation-delay: -5s; }
+  .leaf:nth-child(4) { bottom: 0; left: -10px; font-size: 100px; animation-delay: -2s; opacity: 0.05; }
+  @keyframes sway { from { transform: rotate(-4deg) scale(1); } to { transform: rotate(4deg) scale(1.04); } }
+
+  .header-inner {
+    max-width: 1040px; margin: 0 auto;
+    padding: 3rem 2rem 2.75rem;
+    position: relative; z-index: 1;
+  }
+  .header-eyebrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 20px; padding: 3px 14px;
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(255,255,255,0.7); font-weight: 600; margin-bottom: 1.1rem;
+  }
+  .header h1 {
+    font-family: 'Lora', Georgia, serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 600; color: #fff; line-height: 1.1;
+    margin-bottom: 0.6rem; letter-spacing: -0.01em;
+  }
+  .header h1 em { font-style: italic; font-weight: 400; color: var(--orange); }
+  .header-sub {
+    font-size: 14px; color: rgba(255,255,255,0.55);
+    font-weight: 300; max-width: 480px; line-height: 1.7;
+  }
+
+  /* ── PAGE ── */
+  .page {
+    max-width: 1040px; margin: 0 auto;
+    padding: 2.5rem 2rem 3rem;
+    position: relative; z-index: 1;
+    flex: 1;
+  }
+
+  .section-label {
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-ghost); font-weight: 700; margin-bottom: 1.25rem;
+  }
+
+  /* ── TILES ── */
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
+
+  .tile {
+    background: var(--white);
+    border: 1.5px solid var(--mid);
+    border-radius: var(--r-xl);
+    padding: 1.75rem;
+    text-decoration: none;
+    color: inherit;
+    display: flex; flex-direction: column;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+    position: relative; overflow: hidden;
+  }
+  .tile::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--orange), var(--orange-mid));
+    opacity: 0; transition: opacity 0.2s ease;
+  }
+  .tile:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-3px);
+    border-color: var(--orange-bd);
+  }
+  .tile:hover::after { opacity: 1; }
+
+  .tile-icon {
+    width: 52px; height: 52px;
+    background: var(--orange-pale);
+    border: 1.5px solid var(--orange-bd);
+    border-radius: var(--r-lg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; margin-bottom: 1.1rem; flex-shrink: 0;
+  }
+  .tile-name {
+    font-family: 'Lora', serif;
+    font-size: 1.2rem; font-weight: 600;
+    color: var(--dark); margin-bottom: 0.4rem; line-height: 1.2;
+  }
+  .tile-desc {
+    font-size: 13px; color: var(--ink-soft);
+    line-height: 1.65; font-weight: 400; flex: 1;
+  }
+  .tile-cta {
+    display: inline-flex; align-items: center; gap: 5px;
+    margin-top: 1.25rem; font-size: 12px; font-weight: 700;
+    color: var(--orange); letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .tile-cta svg { width: 13px; height: 13px; transition: transform 0.2s; }
+  .tile:hover .tile-cta svg { transform: translateX(3px); }
+
+  .tile.coming-soon {
+    opacity: 0.6; pointer-events: none; cursor: default;
+  }
+  .tile.coming-soon::after { display: none; }
+  .coming-pill {
+    display: inline-flex; align-items: center;
+    margin-top: 1.25rem; font-size: 10px; font-weight: 700;
+    background: var(--bg); border: 1px solid var(--mid);
+    color: var(--ink-ghost); padding: 3px 10px; border-radius: 20px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    position: relative; z-index: 1;
+    text-align: center; padding: 1.5rem 2rem;
+    font-size: 11px; color: var(--ink-ghost); line-height: 1.8;
+    border-top: 1px solid var(--mid);
+    background: var(--white);
+  }
+
+  @media (max-width: 640px) {
+    .header-inner { padding: 2rem 1rem 1.75rem; }
+    .page { padding: 1.5rem 1rem 2rem; }
+    .tiles { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-leaves" aria-hidden="true">
+    <span class="leaf">🏙</span>
+    <span class="leaf">🏘</span>
+    <span class="leaf">🔑</span>
+    <span class="leaf">🏗</span>
+  </div>
+  <div class="header-inner">
+    <div class="header-eyebrow">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+      BBK Internal Tools
+    </div>
+    <h1>BBK App <em>Portal</em></h1>
+    <p class="header-sub">Your central hub for BBK property and transaction tools.</p>
+  </div>
+</header>
+
+<div class="page">
+  <p class="section-label">Available apps</p>
+  <div class="tiles">
+
+    <a class="tile" href="EquityPro.html">
+      <div class="tile-icon">🏡</div>
+      <p class="tile-name">Equity Calculator</p>
+      <p class="tile-desc">Model downsize and upsize scenarios. Calculates net proceeds, new loan, repayments, stamp duty, and affordability across a purchase price range.</p>
+      <span class="tile-cta">
+        Open app
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </span>
+    </a>
+
+    <a class="tile" href="Bidder.html">
+      <div class="tile-icon">🔨</div>
+      <p class="tile-name">Bidder</p>
+      <p class="tile-desc">Auction bidding tool. Manage live bidding strategy, track increments, and stay on top of your limit during auction day.</p>
+      <span class="tile-cta">
+        Open app
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </span>
+    </a>
+
+  </div>
+</div>
+
+<footer class="footer">
+  BBK Internal Tools &nbsp;·&nbsp; For authorised use only &nbsp;·&nbsp; Not financial advice
+</footer>
+
+</body>
+</html>
