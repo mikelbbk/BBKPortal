@@ -1,0 +1,24 @@
+:root {
+  /* Surface */
+  --bg:    #eaefef;
+  --white: #ffffff;
+
+  /* Neutrals */
+  --mid:  #bfc9d1;
+  --dark: #25343f;
+
+  /* Accent — orange */
+  --orange:      #ff9b51;
+  --orange-mid:  #ff8535;
+  --orange-pale: #fff5ee;
+  --orange-bd:   #ffd8b4;
+
+  /* Ink scale */
+  --ink-soft:  #6a7f8c;
+  --ink-ghost: #9aadb8;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 4px rgba(37,52,63,0.08);
+  --shadow:    0 4px 20px rgba(37,52,63,0.12);
+  --shadow-lg: 0 8px 32px rgba(37,52,63,0.16);
+}
