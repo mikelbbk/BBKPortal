@@ -5,24 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Equity Calculator Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/tokens.css">
 <style>
   :root {
-    --sage:       #ff9b51;
-    --sage-mid:   #ff8535;
-    --sage-pale:  #ffd8b4;
-    --sage-wash:  #fff5ee;
-    --stone-pale: #bfc9d1;
+    /* aliases → shared tokens */
+    --sage:       var(--orange);
+    --sage-mid:   var(--orange-mid);
+    --sage-pale:  var(--orange-bd);
+    --sage-wash:  var(--orange-pale);
+    --stone-pale: var(--mid);
+    --cream:      var(--bg);
+    --warm-white: var(--white);
+    --ink:        var(--dark);
+    --sky:        var(--orange);
+
+    /* EquityPro-specific */
     --stone-wash: #d8e2e6;
-    --cream:      #eaefef;
     --cream2:     #dde6e8;
-    --warm-white: #ffffff;
-    --ink:        #25343f;
     --ink-mid:    #3d5060;
-    --ink-soft:   #6a7f8c;
-    --ink-ghost:  #9aadb8;
     --ink-mist:   #c4d0d8;
     --terracotta: #d94020;
-    --sky:        #ff9b51;
     --sky-pale:   #fff0e2;
     --gold:       #e08820;
     --green-pill: #2d6a45;
@@ -31,19 +33,23 @@
     --amber-bg:   #fdf0d8;
     --rose-pill:  #8a2a2a;
     --rose-bg:    #fae8e8;
+
+    /* radii */
     --r:    8px;
     --r-lg: 14px;
     --r-xl: 20px;
-    --shadow-sm: 0 1px 4px rgba(37,52,63,0.08);
-    --shadow:    0 3px 14px rgba(37,52,63,0.12);
+
+    /* shadow override (tighter than shared default) */
+    --shadow: 0 3px 14px rgba(37,52,63,0.12);
+
     /* theme tokens — overridden for upsize */
     --t-hdr1: #25343f; --t-hdr2: #1c2830; --t-hdr3: #131d24;
-    --t-accent: #ff9b51;
-    --t-accent-pale: #fff5ee;
-    --t-accent-border: #ffd8b4;
+    --t-accent: var(--orange);
+    --t-accent-pale: var(--orange-pale);
+    --t-accent-border: var(--orange-bd);
     --t-focus: rgba(255,155,81,0.15);
     --t-th1: #25343f; --t-th2: #354a58;
-    --t-sweet1: #fff5ee; --t-sweet2: #ffe8d0; --t-sweet-bd: #ffd8b4;
+    --t-sweet1: var(--orange-pale); --t-sweet2: #ffe8d0; --t-sweet-bd: var(--orange-bd);
   }
 
   body.up {
@@ -482,6 +488,7 @@
           <th id="thSaving">Monthly saving</th>
           <th id="thAnnual">Annual saving</th>
           <th class="income-col">% of income</th>
+          <th class="income-col">Spare / mo</th>
           <th>LVR</th>
         </tr>
       </thead>
@@ -840,12 +847,11 @@
 
       const pp = pct(r), ss = sp(r);
       const pctD = hasIncome
-        ? (isFree ? '<span class="pct-good">0%</span>' : `<span class="${pctCls(pp)}">${pp!==null?pp.toFixed(1)+'%':'—'}</span>`)
-        : '<span style="color:var(--ink-ghost)">—</span>';
+        ? (isFree ? '0%' : `${pp!==null?pp.toFixed(1)+'%':'—'}`)
+        : '—';
       const spD = hasIncome
-        ? (isFree ? `<span class="sp-pos">${fmtAUD(income-expenses)}</span>`
-                  : `<span class="${ss>=0?'sp-pos':'sp-neg'}">${ss>=0?fmtAUD(ss):'−'+fmtAUD(Math.abs(ss))}</span>`)
-        : '<span style="color:var(--ink-ghost)">—</span>';
+        ? (isFree ? fmtAUD(income-expenses) : `${ss>=0?fmtAUD(ss):'−'+fmtAUD(Math.abs(ss))}`)
+        : '—';
 
       const repayTdClass = isFree ? 'td-repay-free' : isSweet ? 'td-repay-sweet' : isOver ? 'td-repay-over' : 'td-repay';
 
@@ -856,9 +862,10 @@
         <td>${fmtAUD(stamp)}</td>
         <td>${isFree?'—':fmtAUD(loan)}</td>
         <td class="${repayTdClass}">${isFree?'Nil':fmtAUD(r)}<span style="font-size:0.72em;font-weight:400;opacity:0.6;font-family:'Nunito',sans-serif">/mo</span></td>
-        <td>${diffD}</td>
+        <td style="font-weight:600;color:${diff>=0?'var(--green-pill)':'var(--terracotta)'}">${diffD}</td>
         <td>${annD}</td>
         <td class="income-col">${pctD}</td>
+        <td class="income-col" style="color:${hasIncome&&ss!==null?(ss>=0?'var(--dark)':'var(--terracotta)'):''}">${spD}</td>
         <td>${isFree?'0.0%':fmtPct(lvr)}</td>
       `;
       tbody.appendChild(tr);
